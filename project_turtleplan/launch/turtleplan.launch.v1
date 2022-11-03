@@ -1,0 +1,48 @@
+<launch>
+
+	<include file="$(find project_turtleplan)/launch/newNav_turtleplan.launch">
+	</include> 
+
+	<!-- data paths -->
+	<param name="/rosplan/data_path" value="$(find rosplan_planning_system)/common/" /> <!-- folder to save the plan files + problem.pddl + plan.pddl + plan.strl -->
+	<param name="/rosplan/planner_path" value="$(find rosplan_planning_system)/common/bin/" /> <!-- a folder where the solver is located -->
+
+	<!-- domain file --> 
+	<!-- TODO: 
+	v need to update domain path
+	v need to update domain to support multiple agents -->
+	<param name="/rosplan/domain_path" value="$(find project_turtleplan)/common/domain-2.pddl" />
+
+	<!-- knowledge base -->
+	<node name="rosplan_knowledge_base" pkg="rosplan_knowledge_base" type="knowledgeBase" respawn="false" output="screen">
+	    <param name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB/" />
+		<!-- conditional planning flags -->
+		<param name="use_unknowns" value="False" />
+	</node>
+
+	<!-- scene database (MongoDB) -->
+	<node name="rosplan_scene_database" pkg="mongodb_store" type="mongodb_server.py" respawn="false" output="log">
+		<param name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB" />
+	</node>
+	<node name="rosplan_scene_message_store" pkg="mongodb_store" type="message_store_node.py" respawn="false" output="log" />
+
+	<!-- planning system -->
+	<node name="rosplan_planning_system" pkg="rosplan_planning_system" type="planner" respawn="false" output="screen">
+		<!-- directory for generated files -->
+		<param name="data_path" value="$(find rosplan_planning_system)/common/" />
+		<param name="problem_path" value="$(find rosplan_planning_system)/common/problem.pddl" />
+		<param name="strl_file_path" value="$(find rosplan_planning_system)/common/plan.strl" />
+
+		<!-- to run the planner -->
+		<param name="planner_command" value="timeout 10 $(find rosplan_planning_system)/common/bin/popf -n DOMAIN PROBLEM" />
+		<param name="generate_default_problem" value="true" />
+		<param name="max_dispatch_attempts" value="2" />
+	</node>
+
+
+	<!-- interfaces -->
+	<node name="turtle_rosplan" pkg="project_turtleplan" type="turtle_rosplan.py" respawn="false" output="screen" />
+
+
+
+</launch>

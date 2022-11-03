@@ -1,0 +1,50 @@
+(define (problem task)
+(:domain turtlebot_demo_oz)
+(:objects
+    a3 h1 h2 b3 a1 a2 b1 b2 srv - waypoint
+    rob-a rob-b - robot
+)
+(:init
+
+    (connected a3 h2)
+    (connected h2 a3)
+    (connected h2 b3)
+    (connected a1 a1)
+    (connected a2 a1)
+    (connected a1 a2)
+    (connected a2 a2)
+    (connected b1 a1)
+    (connected a1 b1)
+    (connected b1 a2)
+    (connected a2 b1)
+    (connected b1 b1)
+    (connected b2 a1)
+    (connected a1 b2)
+    (connected b2 a2)
+    (connected a2 b2)
+    (connected b2 b1)
+    (connected b1 b2)
+    (connected b2 b2)
+    (connected srv a1)
+    (connected a1 srv)
+    (connected srv a2)
+    (connected a2 srv)
+    (connected srv b1)
+    (connected b1 srv)
+    (connected srv b2)
+    (connected b2 srv)
+    (connected srv srv)
+
+
+    (free h1)
+    (free h2)
+    (free b3)
+
+)
+(:goal (and
+    (visited rob-a srv)
+    (visited rob-b srv)
+    (robot_at rob-a b1)
+    (robot_at rob-b b2)
+))
+)

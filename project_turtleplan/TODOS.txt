@@ -1,0 +1,93 @@
+### TODOS ### 
+
+* 
+
+* the new launch file can:
+  - load a world
+  - spawn turtlebot
+  - load a map
+  - navigate in the world
+  launch it with the command:
+  roslaunch project_turtleplan newNav_turtleplan.launch
+
+* study the rosplan structure and inplement it on newNav launch file.
+  - make an interfaced[..].launch file
+  
+
+* make a new map based on the model:
+	load world with:
+	  roslaunch turtlebot_gazebo turtlebot_world.launch
+	see world through rviz with:
+	  roslaunch turtlebot_rviz_launchers view_navigation.launch
+	start amcl with:
+	  roslaunch turtlebot_gazebo amcl_demo.launch
+
+	milestones:
+	~~~~~~~~~~~
+	 v build a world
+	 v build a launch file to load turtlebot to the world
+	 v map the world and save it
+
+
+* try navigate in a different world
+  V make a new world
+  V map the new world
+  v try navigate in the new world
+
+* load saved map
+  - search internet
+  http://wiki.ros.org/turtlebot_navigation/Tutorials/Autonomously%20navigate%20in%20a%20known%20map
+  http://wiki.ros.org/turtlebot_simulator/Tutorials/hydro/Make%20a%20map%20and%20navigate%20with%20it
+  - bringup turtlebot and map
+  roslaunch project_turtleplan world_turtleplan.launch
+  - load world with
+  	roslaunch project_turtleplan world_turtleplan.launch 
+  - load map with
+  	roslaunch turtlebot_navigation amcl_demo.launch map_file:=~/ros_ws/src/project_turtleplan/maps/turtleplan5_map.yaml
+  - navigate to point in map with
+
+
+* make a map of the world and save it
+  V load launch file with: 
+	roslaunch project_turtleplan mapping_turtleplan.launch
+  V teleoperation of the turtle with:
+	roslaunch turtlebot_teleop keyboard_teleop.launch
+  V saved map to project_turtleplan/maps
+
+* improve the mapping 
+https://answers.ros.org/question/269280/how-to-make-better-maps-using-gmapping/
+  V make the walls smaller
+  V add items to map
+  V make map default in main file
+  V set the minimum score to 100 in gmapping.launch.xml /
+  V decrease robot speed
+  V test again
+
+
+* change height of the walls to 1.2 m.
+DONE
+
+* install and run roscon.
+http://wiki.ros.org/turtle_concert/Tutorials/indigo/
+
+* make a map to navigate in it
+DONE: http://wiki.ros.org/turtlebot_gazebo/Tutorials/indigo/Make%20a%20map%20and%20navigate%20with%20it
+bring up the TurtleBot simulation
+	roslaunch turtlebot_gazebo turtlebot_world.launch
+start map building
+	roslaunch turtlebot_gazebo gmapping_demo.launch
+Use RViz to visualize the map
+	roslaunch turtlebot_rviz_launchers view_navigation.launch
+
+* change the turtlebot initial location.
+DONE: made a new file : kobukiPlan
+this file spawns a turtle bot into map in a specific location with the argument turtle_pose.
+
+these files 
+* make a map. 
+DONE: has to be in /opt/ros/indigo/share/turtlebot_gazebo/worlds under the name turtleplan.world.
+
+
+* load this map with world_turtleplan.launch
+DONE: change the argument in file main_turtleplan.launch
+

@@ -1,0 +1,81 @@
+<launch>
+	<!-- parameters -->
+	<arg name="robot_name" default="robot_0"/>
+	<arg name="initial_pose" default="-x 0 -y 0 -z 0"/>
+	<arg name="initial_pose_x" default="0"/>
+	<arg name="initial_pose_y" default="0"/>
+	<arg name="initial_pose_a" default="0"/>
+	<arg name="stacks"    value="$(optenv TURTLEBOT_STACKS hexagons)"/>  <!-- circles, hexagons --> 
+	<arg name="3d_sensor" value="$(optenv TURTLEBOT_3D_SENSOR asus_xtion_pro)"/>  <!-- kinect, asus_xtion_pro --> 
+	<arg name="battery"   value="$(optenv TURTLEBOT_BATTERY /proc/acpi/battery/BAT0)"/> <!-- /proc/acpi/battery/BAT0 --> 
+	<arg name="base"      value="$(optenv TURTLEBOT_BASE kobuki)"/> <!-- create, roomba -->
+	
+	<!-- spawn turtle to gazebo -->
+	<node name="spawn_turtlebot_model" pkg="gazebo_ros" type="spawn_model"
+        args="$(arg initial_pose) -unpause -urdf -param /robot_description -model $(arg robot_name)" respawn="false" output="screen"/>
+    
+    <!-- start state publisher -->
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    	<param name="publish_frequency" type="double" value="30.0" />
+  	</node>
+  	
+  	<!-- start scan -->
+  	<!-- 3D sensor -->
+	<include file="$(find turtlebot_bringup)/launch/3dsensor.launch">
+		<arg name="rgb_processing" value="false" />
+		<arg name="depth_registration" value="false" />
+		<arg name="depth_processing" value="false" />
+
+		<!-- We must specify an absolute topic name because if not it will be prefixed by "$(arg camera)".
+		     Probably is a bug in the nodelet manager: https://github.com/ros/nodelet_core/issues/7 --> 
+		<arg name="scan_topic" value="scan" />
+	</include>
+  	<!--  -->
+  	<node pkg="nodelet" type="nodelet" name="laserscan_nodelet_manager" args="manager">
+  		<param name="tf_prefix" value="robot_0" />
+	</node>
+  	<!-- <node pkg="nodelet" type="nodelet" name="depthimage_to_laserscan"
+        args="load depthimage_to_laserscan/DepthImageToLaserScanNodelet laserscan_nodelet_manager">
+        <param name="tf_prefix" value="robot_0" />
+	    <param name="scan_height" value="10"/>
+	    <param name="output_frame_id" value="/camera_depth_frame"/>
+	    <param name="range_min" value="0.45"/> -->
+	    <!-- <param name="odom_frame" value="$(arg robot_name)/odom"/>
+	    <param name="base_frame" value="$(arg robot_name)/base_footprint"/> -->
+	    <!-- <remap from="image" to="/camera/depth/image_raw"/> -->
+    	<!-- <remap from="scan" to="/scan"/> -->
+    	<!-- <remap from="mobile_base/odom" to="odom" /> -->
+  	<!-- </node> -->
+  	
+  	<!--- Run AMCL -->
+  	<include file="$(find project_turtleplan)/launch/amcl_multiTurtles.launch">
+	 	<arg name="tf_prefix" value="$(arg robot_name)"/>
+		<arg name="scan_topic" value="scan" />
+		<arg name="use_map_topic" value="true" />
+		<arg name="initial_pose_x" value="$(arg initial_pose_x)" />
+		<arg name="initial_pose_y" value="$(arg initial_pose_y)" />
+		<arg name="initial_pose_a" value="$(arg initial_pose_a)" />
+		<arg name="global_frame_id" value="/map"/>
+	</include>
+
+	<!--- Run move_base -->
+
+
+
+	<!-- <node pkg="move_base" type="move_base" respawn="false" name="move_base_node" output="screen">
+      <remap from="map" to="/map" />
+      <param name="controller_frequency" value="10.0" />
+      <rosparam file="$(find navigation_under_namespace)/params/move_base_config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+      <rosparam file="$(find navigation_under_namespace)/params/move_base_config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+      <rosparam file="$(find navigation_under_namespace)/params/move_base_config/local_costmap_params.yaml" command="load" />
+      <rosparam file="$(find navigation_under_namespace)/params/move_base_config/global_costmap_params.yaml" command="load" />
+      <rosparam file="$(find navigation_under_namespace)/params/move_base_config/base_local_planner_params.yaml" command="load" />
+    </node> -->
+
+
+
+
+
+
+
+</launch>

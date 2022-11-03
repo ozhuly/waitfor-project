@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch> 
+    <!-- arguments -->
+    <arg name="robot_name"/>
+    <arg name="init_pose_x"/>
+    <arg name="init_pose_y"/>
+    <arg name="init_pose_a"/>
+    <arg name="gui" default="true"/>
+    <!-- CALL TF -->   
+    <node pkg="tf" type="static_transform_publisher" name="static_publisher" ns="$(arg robot_name)" args="0 0 0 0 0 0 /world $(arg robot_name)_tf/map 100"/> 
+    <!-- MAP SERVER -->
+    <arg name="map_file" value="$(find project_turtleplan)/maps/turtlePlan7.yaml"/>
+    <node name="map_server" pkg="map_server" type="map_server" ns="$(arg robot_name)" args="$(arg map_file)" >
+        <param name="frame_id" value="$(arg robot_name)_tf/map" />
+    </node>
+    <!-- SPAWN ROBOT -->
+    <group ns="$(arg robot_name)">
+        <include file="$(find project_turtleplan)/launch/bringTurtles/bring_kobuki.launch.xml">
+            <arg name="base" value="kobuki"/>
+            <arg name="stacks" value="hexagons"/>
+            <arg name="3d_sensor" value="kinect"/>
+            <arg name="robot_namespace" value="$(arg robot_name)" />
+            <arg name="init_pose" value="-x $(arg init_pose_x) -y $(arg init_pose_y) -z 0.0 -R 0 -P 0 -Y $(arg init_pose_a)" />
+        </include>
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher" output="screen">
+            <param name="publish_frequency" type="double" value="30.0" />
+        </node>
+    </group>
+    <!-- MOVE BASE -->  
+    <include file="$(find project_turtleplan)/launch/bringTurtles/bring_movebase.launch">
+        <arg name="namespace_prefix" value="$(arg robot_name)" />
+    </include>
+    <!-- AMCL -->
+    <include file="$(find project_turtleplan)/launch/bringTurtles/bring_amcl.launch.xml">
+        <arg name="initial_pose_x" value="$(arg init_pose_x)"/>
+        <arg name="initial_pose_y" value="$(arg init_pose_y)"/>
+        <arg name="initial_pose_a" value="$(arg init_pose_a)"/>
+        <arg name="robot_namespace" value="$(arg robot_name)"/>
+    </include>
+    <!-- ODOMETRY -->
+    <node pkg="nodelet" type="nodelet" name="laserscan_nodelet_manager" ns="$(arg robot_name)" args="manager"/>
+    <node pkg="nodelet" type="nodelet" name="depthimage_to_laserscan" ns="$(arg robot_name)"
+        args="load depthimage_to_laserscan/DepthImageToLaserScanNodelet laserscan_nodelet_manager">
+        <param name="scan_height" value="10"/>
+        <param name="output_frame_id" value="$(arg robot_name)_tf/camera_depth_frame"/>
+        <param name="range_min" value="0.45"/>
+        <remap from="image" to="camera/depth/image_raw"/>
+        <remap from="scan" to="scan"/>
+    </node>
+
+
+
+	<!-- plan parsing -->
+	<node name="rosplan_parsing_interface" pkg="rosplan_planning_system" type="pddl_simple_plan_parser" respawn="false" output="screen" ns="$(arg robot_name)">
+		<param name="knowledge_base" value="rosplan_knowledge_base" />
+		<param name="planner_topic"  value="/rosplan_planner_interface/planner_output" />
+		<param name="plan_topic"     value="complete_plan" />
+	</node>
+
+	<!-- plan dispatching -->
+	<node name="rosplan_plan_dispatcher" pkg="rosplan_planning_system" type="pddl_simple_plan_dispatcher" respawn="false" output="screen" ns="$(arg robot_name)">
+		<param name="knowledge_base"        value="rosplan_knowledge_base" />
+		<param name="plan_topic"            value="/$(arg robot_name)/rosplan_parsing_interface/complete_plan" />
+		<param name="action_dispatch_topic" value="action_dispatch" />
+		<param name="action_feedback_topic" value="action_feedback" />
+	</node>
+
+	<!-- interfaces -->
+	<node name="$(arg robot_name)_turtle_rosplan" pkg="project_turtleplan" type="turtle_rosplan.py" respawn="false" output="screen" args='$(arg robot_name)'/>
+
+	<!-- rosplan move base action interface, makes link between rosplan dispatcher and hardware >
+	<node pkg="rosplan_interface_movebase" type="rpmovebase" name="rosplan_interface_movebase" respawn="false" output="screen" ns="$(arg robot_name)">
+		<param name="knowledge_base" value="rosplan_knowledge_base"/>
+		<param name="action_server" value="/$(arg robot_name)/move_base"/>
+		<param name="pddl_action_name" value="goto_waypoint"/>
+		<param name="action_dispatch_topic" value="/$(arg robot_name)/rosplan_plan_dispatcher/action_dispatch"/>
+		<param name="action_feedback_topic" value="/$(arg robot_name)/rosplan_plan_dispatcher/action_feedback"/>
+	</node-->
+
+</launch>

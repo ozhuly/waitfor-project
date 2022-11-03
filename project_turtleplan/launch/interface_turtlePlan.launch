@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!-- data paths -->
+	<!-- TODO: 
+	v need to update problem path
+	v need to create a problem file for example
+	v need to create a more realistic problem file
+	-  -->
+	<param name="/rosplan/data_path" value="$(find project_turtleplan)/common/" /> <!-- folder to save the plan files + problem.pddl + plan.pddl + plan.strl -->
+	<param name="/rosplan/planner_path" value="$(find rosplan_planning_system)/common/bin/" /> <!-- a folder where the solver is located -->
+
+	<!-- domain file --> 
+	<!-- TODO: 
+	v need to update domain path
+	v need to update domain to support multiple agents -->
+	<param name="/rosplan/domain_path" value="$(find project_turtleplan)/common/domain-2.pddl" />
+
+	<!-- knowledge base -->
+	<node name="rosplan_knowledge_base" pkg="rosplan_knowledge_base" type="knowledgeBase" respawn="false" output="screen">
+	    <param name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB/" />
+		<!-- conditional planning flags -->
+		<param name="use_unknowns" value="False" />
+	</node>
+
+	<!-- scene database (MongoDB) -->
+	<node name="rosplan_scene_database" pkg="mongodb_store" type="mongodb_server.py" respawn="false" output="log">
+		<param name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB" />
+	</node>
+	<node name="rosplan_scene_message_store" pkg="mongodb_store" type="message_store_node.py" respawn="false" output="log" />
+
+	<!-- planning system -->
+	<node name="rosplan_planning_system" pkg="rosplan_planning_system" type="planner" respawn="false" output="screen">
+		<!-- directory for generated files -->
+		<!-- TODO: 
+		v need to update planning files path
+		v figure what is the strl file 
+		    probably an automatic file, no need to change (probably) -->
+		<param name="data_path" value="$(find project_turtleplan)/common/" />
+		<param name="problem_path" value="$(find project_turtleplan)/common/problem.pddl" />
+		<param name="strl_file_path" value="$(find project_turtleplan)/common/plan.strl" />
+
+		<!-- to run the planner -->
+		<param name="planner_command" value="timeout 10 $(find rosplan_planning_system)/common/bin/popf -n DOMAIN PROBLEM" />
+		<param name="generate_default_problem" value="true" />
+		<param name="max_dispatch_attempts" value="2" />
+	</node>
+
+	<!-- interfaces -->
+	<!-- TODO: 
+	v make a duplicate file with updated paths
+	- check if more modifications are needed -->
+	<include file="$(find project_turtleplan)/launch/rosplan_roadmap_server_turtleplan.launch" />
+
+	<!-- TODO: 
+	- check if an update is needed -->
+	<node name="rosplan_interface_movebase" pkg="rosplan_interface_movebase" type="rpmovebase" respawn="false" output="screen">
+		<param name="action_server" value="/move_base" />
+		<param name="pddl_action_name" value="goto_waypoint" />
+	</node>
+
+	<node name="rosplan_interface_wait_goto" pkg="rosplan_planning_system" type="rpmovebase" respawn="false" output="screen">
+		<param name="action_server" value="/wait_goto" />
+		<param name="pddl_action_name" value="wait_goto" />
+	</node>
+</launch>

@@ -1,0 +1,31 @@
+// turtle plan interface
+
+
+- load world, map, turtlebot and rosplan interface with:
+	roslaunch project_turtleplan turtleplan.launch
+
+- open rqt for graphic interface:
+	rqt --standalone rosplan_rqt.dispatcher.ROSPlanDispatcher
+
+- load objects, initial state and goal state with:
+	source setup.sh 
+
+- create txt file to describe the waypoints
+
+
+
+send a command to turtlebot using code
+- load world, turtlebot and map
+    load the launch file with:
+    roslaunch project_turtleplan newNav_turtleplan.launch
+
+- publish target to turtlebot topic using a command line
+    within the command line enter the following:
+    rostopic pub /move_base_simple/goal geometry_msgs/PoseStamped '{header: {stamp: now, frame_id: "map"}, pose: {position: {x: 0.5, y: 0.5, z: 0.0}, orientation: {w: 1.0}}}'
+
+- open the script of move_base interface
+
+- copy the interface to project_turtleplan and try to make it work with the current map.
+
+
+

@@ -1,0 +1,20 @@
+<launch>
+    <arg name="robot_description_path" />
+    <arg name="namespace_prefix" default="robot_namespace" />
+    
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" ns="$(arg namespace_prefix)" >
+        <rosparam file="$(find project_turtleplan)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+        <rosparam file="$(find project_turtleplan)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+        <rosparam file="$(find project_turtleplan)/config/local_costmap_params.yaml" command="load" />
+        <rosparam file="$(find project_turtleplan)/config/global_costmap_params.yaml" command="load" />
+        <rosparam file="$(find project_turtleplan)/config/base_local_planner_params.yaml" command="load" />
+    </node>
+	
+	<!-- roadmap (random waypoint generation) -->
+	<include file="$(find rosplan_interface_mapping)/launch/rosplan_roadmap_server.launch" ns="$(arg namespace_prefix)">
+		<arg name="costmap_topic" value="/$(arg namespace_prefix)/move_base/global_costmap/costmap"/>
+		<arg name="odom_topic" value="/$(arg namespace_prefix)/odom"/>
+	</include>
+
+
+</launch>

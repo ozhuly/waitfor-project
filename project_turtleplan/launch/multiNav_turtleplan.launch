@@ -1,0 +1,21 @@
+<launch>
+
+<!-- load world with: -->
+<include file="$(find project_turtleplan)/launch/world_turtleplan.launch">
+	<arg name="world_file" value="$(find project_turtleplan)/worlds/turtleplan7.world"/>
+</include>
+
+<!-- spawn turtlebots -->
+<include file="$(find project_turtleplan)/launch/spawnMultipleTurtles.launch">
+</include>
+
+
+<!-- start rviz -->
+<!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_rviz_launchers)/rviz/navigation.rviz"/>  -->
+
+<!-- start amcl -->
+<!-- <include file="$(find turtlebot_gazebo)/launch/amcl_demo.launch">
+	<arg name="map_file" value="$(find project_turtleplan)/maps/turtlePlan7.yaml"/>
+</include>	 -->
+
+</launch>

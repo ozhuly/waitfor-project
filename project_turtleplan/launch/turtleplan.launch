@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+	<include file="$(find project_turtleplan)/launch/bringTurtles/bring_main.launch">
+		<arg name="gazebo_gui" value="true"/>
+	</include> 
+
+	<!-- data paths -->
+	<param name="/rosplan/data_path" value="$(find rosplan_planning_system)/common/" /> <!-- folder to save the plan files + problem.pddl + plan.pddl + plan.strl -->
+	<param name="/rosplan/planner_path" value="$(find rosplan_planning_system)/common/bin/" /> <!-- a folder where the solver is located -->
+
+	<!-- domain file --> 
+	<!-- TODO: 
+	v need to update domain path
+	v need to update domain to support multiple agents
+	- need to update domain to support concurrent actions -->
+	<param name="/rosplan/domain_path" value="$(find project_turtleplan)/common/domain-2.pddl" />
+
+	<!-- knowledge base -->
+	<node name="rosplan_knowledge_base" pkg="rosplan_knowledge_base" type="knowledgeBase" respawn="false" output="screen">
+		<param name="domain_path" value="$(find project_turtleplan)/common/domain-2.pddl" />
+		<param name="problem_path" value="$(find project_turtleplan)/common/problem.pddl" />
+		<param name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB/" />
+		<!-- conditional planning flags -->
+		<param name="use_unknowns" value="False" />
+		
+	</node>
+
+	<!-- scene database (MongoDB) -->
+	<node name="rosplan_scene_database" pkg="mongodb_store" type="mongodb_server.py" respawn="false" output="log">
+		<param name="database_path" value="$(find rosplan_knowledge_base)/common/mongoDB" />
+	</node>
+	<node name="rosplan_scene_message_store" pkg="mongodb_store" type="message_store_node.py" respawn="false" output="log"/>
+
+	
+
+	<!-- planner interface -->
+	<include file="$(find rosplan_planning_system)/launch/includes/planner_interface.launch">
+		<arg name="use_problem_topic"    value="true" />
+		<arg name="problem_topic"        value="/rosplan_problem_interface/problem_instance" />
+		<arg name="planner_topic"        value="planner_output" />
+		<arg name="domain_path"          value="$(find project_turtleplan)/common/domain-2.pddl" />
+		<arg name="problem_path"         value="$(find project_turtleplan)/common/problem-1.pddl" />
+		<arg name="data_path"            value="$(find project_turtleplan)/common/" />
+		<arg name="planner_command"      value="timeout 10 $(find rosplan_planning_system)/common/bin/popf DOMAIN PROBLEM" />
+	</include>
+
+</launch>

@@ -1,0 +1,31 @@
+<launch>
+  <!-- parameters -->
+  <param name="/use_sim_time" value="true"/>
+  <arg name="urdf_file" default="$(find xacro)/xacro.py '$(find turtlebot_description)/robots/kobuki_hexagons_kinect.urdf.xacro'" />
+  <arg name="robotName1" default="robot_0" />
+  <param name="robot_description" command="$(arg urdf_file)" />
+
+
+  <!-- load world with: -->
+  <include file="$(find project_turtleplan)/launch/world_turtleplan.launch">
+    <arg name="world_file" value="$(find project_turtleplan)/worlds/turtleplan7.world"/>
+  </include>
+
+  <!-- Run the map server -->
+  <arg name="map_file" default="$(find project_turtleplan)/maps/turtlePlan7.yaml"/>
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" >
+    <param name="frame_id" value="/map" />
+  </node>
+
+  <!-- BEGIN ROBOT 0 -->
+  <group ns="robot_0">
+    <param name="tf_prefix" value="$(arg robotName1)"/>
+    <include file="$(find project_turtleplan)/launch/oneturtle_multiTurtles.launch">
+      <arg name="robot_name"  value="$(arg robotName1)" />
+      <arg name="initial_pose" value="-x 0 -y 0 -z 0"/>
+    </include>
+  </group>
+
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turtlebot_rviz_launchers)/rviz/navigation.rviz"/> -->
+
+</launch>
