@@ -8,4 +8,4 @@ than after it finishes run on each terminal: 'bash run_plan.bash robot_number' w
 see what happens on the simulation :)
 
 # turtlebot_detector
-in the folder turtlebot_detecor there is a py file called create_demo.py, this file reads the video file called turtlebot_vid_for_demo.mp4 and creates the video turtlebot_detector_demo where the detector marked the detected turtlebots. the weights file of the model is turtlebot_detector.pt
+in the folder turtlebot_detecor there is a py file called create_demo.py, this file reads the video file called turtlebot_vid_for_demo.mp4 and creates the video turtlebot_detector_demo where the detector marked the detected turtlebots using torch. the weights file of the model is turtlebot_detector.pt
